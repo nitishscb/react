@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'docker:latest'  // Use the Docker image as the agent
+            args '-v $HOME:/home -w /home'  // Mount home directory and set working directory
+        }
+    }
     
     stages {
         stage('Clone Repository') {
@@ -11,7 +16,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build('hyperswitch-server-2:latest', '.')
+                    // Build the Docker image
+                    sh 'docker build -t hyperswitch-server-2:latest .'
                 }
             }
         }
@@ -25,4 +31,3 @@ pipeline {
         }
     }
 }
-
