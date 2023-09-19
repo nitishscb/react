@@ -20,6 +20,5 @@ RUN sed -i 's/HYPERSWITCH_API_KEY/api key: snd_sbSQ5rR7AoXiUPQh5KNlIud7gGDOT7ikV
 # Expose ports
 EXPOSE 4242 3000
 
-# Run the server and client
-CMD npm run start-server & npm run start-client
-
+# Run npm install, start-server, and start-client
+CMD npm install && npm run start-server & npm run start-client
