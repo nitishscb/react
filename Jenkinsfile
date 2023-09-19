@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/juspay/hyperswitch-react-node'
+                git 'https://github.com/nitishscb/react'
             }
         }
         
