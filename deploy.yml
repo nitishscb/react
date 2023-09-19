@@ -1,7 +1,6 @@
 ---
 - name: Deploy Hyperswitch React Node App
   hosts: localhost
-  become: true
   tasks:
     - name: Pull the Docker image
       docker_image:
