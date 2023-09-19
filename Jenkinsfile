@@ -12,7 +12,7 @@ pipeline {
             steps {
                 script {
                     // Build the Docker image using the local Docker installation
-                    sh 'docker build -t hyperswitch-server-2:latest .'
+                    sh '/usr/local/bin/docker build -t hyperswitch-server-2:latest .'
                 }
             }
         }
