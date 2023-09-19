@@ -1,0 +1,22 @@
+---
+- name: Deploy Hyperswitch React Node App
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Pull the Docker image
+      docker_image:
+        name: hyperswitch-server-2:latest
+        source: pull
+
+    - name: Run the Docker container
+      docker_container:
+        name: hyperswitch-app
+        image: hyperswitch-server-2:latest
+        state: started
+        detach: yes
+        ports:
+          - "3000:3000"
+          - "4242:4242"
+        cpus: "1"
+        mem_limit: "2g"
+
