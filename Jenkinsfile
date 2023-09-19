@@ -11,11 +11,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    def dockerImage = docker.build('hyperswitch-server-2:latest', '.')
-                    dockerImage.inside {
-                        // Any commands you need to run inside the built image
-                        sh 'echo "Building inside the Docker image..."'
-                    }
+                    // Build the Docker image using the local Docker installation
+                    sh 'docker build -t hyperswitch-server-2:latest .'
                 }
             }
         }
