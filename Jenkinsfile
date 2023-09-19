@@ -20,7 +20,7 @@ pipeline {
         stage('Deploy to Docker Swarm') {
             steps {
                 script {
-                    sh '/opt/homebrew/bin/ansible-playbook deploy.yml'
+                    sh '/opt/homebrew/bin/ansible-playbook deploy.yml --ask-become-pass'
                 }
             }
         }
