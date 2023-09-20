@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     parameters {
-        file(name: 'GOOGLE_APPLICATION_CREDENTIALS', description: 'Google Application Credentials JSON Key', defaultValue: 'react-test-nitish1')
+        file(name: 'GOOGLE_APPLICATION_CREDENTIALS', description: 'Google Application Credentials JSON Key')
         string(name: 'PROJECT_ID', description: 'GCP Project ID', defaultValue: 'react-test-nitish1')
         string(name: 'CLUSTER_NAME', description: 'GKE Cluster Name', defaultValue: 'react-app')
         string(name: 'REGION', description: 'GKE Cluster Region', defaultValue: 'us-central1')
