@@ -20,7 +20,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh "docker build -t ${params.IMAGE_NAME}:${params.TAG} ."
+                    sh "/usr/local/bin/docker build -t ${params.IMAGE_NAME}:${params.TAG} ."
                 }
             }
         }
@@ -30,12 +30,12 @@ pipeline {
                 script {
                     // Authenticate with GCR using provided credentials
                     withCredentials([file(credentialsId: 'your-credentials-id', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-                        sh "docker login -u _json_key -p \$(cat \$GOOGLE_APPLICATION_CREDENTIALS) https://gcr.io"
+                        sh "/usr/local/bin/docker login -u _json_key -p \$(cat \$GOOGLE_APPLICATION_CREDENTIALS) https://gcr.io"
                     }
 
                     // Push the Docker image to GCR
-                    sh "docker tag ${params.IMAGE_NAME}:${params.TAG} gcr.io/${params.PROJECT_ID}/${params.IMAGE_NAME}:${params.TAG}"
-                    sh "docker push gcr.io/${params.PROJECT_ID}/${params.IMAGE_NAME}:${params.TAG}"
+                    sh "/usr/local/bin/docker tag ${params.IMAGE_NAME}:${params.TAG} gcr.io/${params.PROJECT_ID}/${params.IMAGE_NAME}:${params.TAG}"
+                    sh "/usr/local/bin/docker push gcr.io/${params.PROJECT_ID}/${params.IMAGE_NAME}:${params.TAG}"
                 }
             }
         }
