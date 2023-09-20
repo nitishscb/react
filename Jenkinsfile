@@ -15,9 +15,9 @@ pipeline {
 
                     // Authenticate using gcloud and validate the credentials
                     sh '''
-                        gcloud auth activate-service-account --key-file=service-account-key.json
-                        gcloud config set project ${GCP_PROJECT_ID}
-                        gcloud compute instances list --limit=1  # Replace with an appropriate gcloud command for validation
+                        /Users/nitish.upadhyay@postman.com/Downloads/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=service-account-key.json
+                        /Users/nitish.upadhyay@postman.com/Downloads/google-cloud-sdk/bin/gcloud config set project ${GCP_PROJECT_ID}
+                        /Users/nitish.upadhyay@postman.com/Downloads/google-cloud-sdk/bin/gcloud compute instances list --limit=1  # Replace with an appropriate gcloud command for validation
                     '''
                 }
             }
