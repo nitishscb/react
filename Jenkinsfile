@@ -19,22 +19,25 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
+                    // Define the temporary file to store the service account key
+                    def tempKeyFile = 'temp-key.json'
+
                     // Retrieve the GCP service account key from the secret file
-                    def serviceAccountKey = credentials('nitish-secret')
+                    withCredentials([file(credentialsId: 'nitish-secret', variable: 'SERVICE_ACCOUNT_KEY')]) {
+                        // Write the service account key to the temporary file
+                        writeFile file: tempKeyFile, text: env.SERVICE_ACCOUNT_KEY
 
-                    // Write the service account key to a temporary file
-                    def tempKeyFile = writeFile(file: 'temp-key.json', text: serviceAccountKey)
+                        // Set the GOOGLE_APPLICATION_CREDENTIALS environment variable to the temporary key file path
+                        withEnv(['GOOGLE_APPLICATION_CREDENTIALS' : tempKeyFile]) {
+                            // Authenticate with Docker using the Google Application Credentials
+                            sh "/usr/local/bin/docker login -u _json_key -p '\$(cat $GOOGLE_APPLICATION_CREDENTIALS)' https://gcr.io"
 
-                    // Set the GOOGLE_APPLICATION_CREDENTIALS environment variable to the temporary key file path
-                    withEnv(['GOOGLE_APPLICATION_CREDENTIALS' : tempKeyFile]) {
-                        // Authenticate with Docker using the Google Application Credentials
-                        sh "/usr/local/bin/docker login -u _json_key -p '\$(cat $GOOGLE_APPLICATION_CREDENTIALS)' https://gcr.io"
+                            // Build the Docker image
+                            sh "/usr/local/bin/docker build -t ${params.IMAGE_NAME}:${params.TAG} ."
 
-                        // Build the Docker image
-                        sh "/usr/local/bin/docker build -t ${params.IMAGE_NAME}:${params.TAG} ."
-
-                        // Push the Docker image to Google Container Registry (GCR)
-                        sh "/usr/local/bin/docker push ${params.IMAGE_NAME}:${params.TAG}"
+                            // Push the Docker image to Google Container Registry (GCR)
+                            sh "/usr/local/bin/docker push ${params.IMAGE_NAME}:${params.TAG}"
+                        }
                     }
 
                     // Clean up the temporary key file
