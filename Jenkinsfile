@@ -1,33 +1,27 @@
 pipeline {
     agent any
-    
-    environment {
-        GCP_SA_KEY_FILE = credentials('GCP_SA_KEY_FILE') // Retrieve the GCP service account key from credentials
-        GOOGLE_APPLICATION_CREDENTIALS = "${env.WORKSPACE}/gcp-sa-key.json" // Path to save the key file within the Jenkins workspace
-    }
-    
+
     stages {
-        stage('Checkout') {
-            steps {
-                // Checkout your source code
-                checkout scm
-            }
-        }
-        
-        stage('Setup Google Cloud SDK') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    // Set up the Google Cloud SDK
-                    sh """
-                        echo ${GCP_SA_KEY_FILE} > ${GOOGLE_APPLICATION_CREDENTIALS}
-                        /Users/nitish.upadhyay@postman.com/Downloads/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
-                    """
+                    // Build your Docker image
+                    sh '/usr/local/bin/docker build -t gcr.io/react-test-nitish1/react2:latest .'
                 }
             }
         }
-        
-        // Add more stages for your build, test, deploy, etc.
+
+        stage('Push to GCP Container Registry') {
+            steps {
+                script {
+                    // Authenticate Docker with GCP Container Registry
+                    sh '/Users/nitish.upadhyay@postman.com/Downloads/google-cloud-sdk/bin/gcloud auth configure-docker'
+                    
+                    // Push the Docker image to GCP Container Registry
+                    sh '/usr/local/bin/docker push gcr.io/your-gcp-project/your-image:tag'
+                }
+            }
+        }
     }
-    
 }
 
