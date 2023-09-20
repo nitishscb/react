@@ -19,7 +19,7 @@ pipeline {
                     def tempKeyFile = 'temp-key.json'
 
                     // Retrieve the GCP service account key from the secret file
-                    withCredentials([file(credentialsId: 'key-sa', variable: 'GC_KEY')]) {
+                    withCredentials([file(credentialsId: 'nitish-secret', variable: 'GC_KEY')]) {
                         // Write the service account key to the temporary file
                         writeFile file: tempKeyFile, text: env.GC_KEY
 
