@@ -20,7 +20,7 @@ pipeline {
             steps {
                 script {
                     // Get the GCP service account credentials from Jenkins global credentials
-                    def credentials = credentials('react-test-nitish1')
+                    def credentials = credentials('nitish-secret')
 
                     // Set the GOOGLE_APPLICATION_CREDENTIALS environment variable to the service account key
                     withCredentials([string(credentialsId: 'react-test-nitish1', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
