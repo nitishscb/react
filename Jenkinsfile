@@ -1,49 +1,39 @@
 pipeline {
     agent any
 
-    parameters {
-        string(name: 'project', description: 'GCP Project ID', defaultValue: 'your-project-id')
+    environment {
+        GCP_CREDENTIALS = credentials('nitish-secret')
+        GCP_PROJECT_ID = 'react-test-nitish1'
     }
 
     stages {
-        stage('Clone Repository') {
-            steps {
-                git 'https://github.com/nitishscb/react'
-            }
-        }
-
-        stage('Build Docker Image') {
+        stage('Authenticate and Validate Credentials') {
             steps {
                 script {
-                    // Define the temporary file to store the service account key
-                    def tempKeyFile = 'temp-key.json'
+                    // Write the GCP credentials to a JSON key file
+                    writeFile file: 'service-account-key.json', text: "${GCP_CREDENTIALS}"
 
-                    // Retrieve the GCP service account key from the secret file
-                    withCredentials([file(credentialsId: 'nitish-secret', variable: 'GC_KEY')]) {
-                        // Write the service account key to the temporary file
-                        writeFile file: tempKeyFile, text: env.GC_KEY
-
-                        // Set the GOOGLE_APPLICATION_CREDENTIALS environment variable to the temporary key file path
-                        withEnv(['GOOGLE_APPLICATION_CREDENTIALS' : tempKeyFile]) {
-                            // Authenticate with gcloud using the Google Application Credentials
-                            sh "gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}"
-                            sh "gcloud container clusters get-credentials prod --zone northamerica-northeast1-a --project ${project}"
-                        }
-                    }
-
-                    // Clean up the temporary key file
-                    deleteFile tempKeyFile
+                    // Authenticate using gcloud and validate the credentials
+                    sh '''
+                        gcloud auth activate-service-account --key-file=service-account-key.json
+                        gcloud config set project ${GCP_PROJECT_ID}
+                        gcloud compute instances list --limit=1  # Replace with an appropriate gcloud command for validation
+                    '''
                 }
             }
         }
 
-        stage('Deploy to GKE') {
+        stage('Deploy to GCP') {
             steps {
-                script {
-                    sh "kubectl apply -f your-kubernetes-deployment.yaml"
-                }
+                // Add steps to deploy to GCP using the authenticated credentials
+                sh '''
+                    # Example: gcloud compute instances create ...
+                    # Use gcloud commands to deploy resources to GCP
+                '''
             }
         }
+
+        // Add more stages as needed
     }
 }
 
