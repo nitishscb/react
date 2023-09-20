@@ -18,13 +18,14 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                withGoogleCredentials(credentialsId: 'react-test-nitish1') {
-                    script {
-                        sh "echo '\$GOOGLE_APPLICATION_CREDENTIALS' > /tmp/gcp-key.json"
-                        sh "export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json"
+                script {
+                    // Get the GCP service account credentials from Jenkins global credentials
+                    def credentials = credentials('react-test-nitish1')
 
+                    // Set the GOOGLE_APPLICATION_CREDENTIALS environment variable to the service account key
+                    withCredentials([string(credentialsId: 'react-test-nitish1', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                         // Authenticate with Docker using the Google Application Credentials
-                        sh "/usr/local/bin/docker login -u _json_key -p '\$(cat /tmp/gcp-key.json)' https://gcr.io"
+                        sh "/usr/local/bin/docker login -u _json_key -p '$GOOGLE_APPLICATION_CREDENTIALS' https://gcr.io"
 
                         // Build the Docker image
                         sh "/usr/local/bin/docker build -t ${params.IMAGE_NAME}:${params.TAG} ."
