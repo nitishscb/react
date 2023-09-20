@@ -20,29 +20,12 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    def credentialsFile = params.GOOGLE_APPLICATION_CREDENTIALS
-
-                    // Print the file path for debugging
-                    echo "Google Application Credentials File: ${credentialsFile}"
-
-                    if (credentialsFile) {
-                        // Check if the file exists
-                        def fileExists = fileExists(credentialsFile)
-                        echo "File exists: ${fileExists}"
-
-                        if (fileExists) {
-                            // Print the content of the credentials file
-                            def credentialsContent = readFile(credentialsFile)
-                            echo "Credentials Content: ${credentialsContent}"
-                        } else {
-                            error "Credentials file not found at specified path."
-                        }
-                    } else {
-                        error "Google Application Credentials file path parameter is null or empty."
-                    }
+                    def credentialsContent = readFile params.GOOGLE_APPLICATION_CREDENTIALS
+                    sh "echo '\$credentialsContent' > /tmp/gcp-key.json"
+                    sh "export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json"
 
                     // Authenticate with Docker using the Google Application Credentials
-                    sh "/usr/local/bin/docker login -u _json_key -p '\$(cat ${credentialsFile})' https://gcr.io"
+                    sh "/usr/local/bin/docker login -u _json_key -p '\$(cat /tmp/gcp-key.json)' https://gcr.io"
 
                     // Build the Docker image
                     sh "/usr/local/bin/docker build -t ${params.IMAGE_NAME}:${params.TAG} ."
@@ -62,11 +45,5 @@ pipeline {
             }
         }
     }
-}
-
-// Function to check if a file exists
-def fileExists(filePath) {
-    def file = new File(filePath)
-    return file.exists()
 }
 
