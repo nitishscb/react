@@ -7,6 +7,7 @@ pipeline {
         string(name: 'REGION', description: 'GKE Cluster Region', defaultValue: 'us-central1')
         string(name: 'IMAGE_NAME', description: 'Docker Image Name', defaultValue: 'gcr.io/react-test-nitish1/react-app2')
         string(name: 'TAG', description: 'Docker Image Tag', defaultValue: 'latest')
+        string(name: 'GOOGLE_APPLICATION_CREDENTIALS', description: 'Google Application Credentials JSON Key')
     }
 
     stages {
