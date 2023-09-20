@@ -16,8 +16,8 @@ pipeline {
                     def credentialsFile = writeCredentialsToFile(credentialsJson)
 
                     // Authenticate with Docker using the Google Application Credentials
-                    def dockerAuthCmd = "/usr/local/bin/docker login -u _json_key --password-stdin https://gcr.io"
-                    sh "cat ${credentialsFile} | ${dockerAuthCmd}"
+                    def dockerAuthCmd = "docker login -u _json_key --password-stdin https://gcr.io"
+                    sh "cat << EOF | ${dockerAuthCmd}\n$(cat ${credentialsFile})\nEOF"
 
                     // Build the Docker image
                     sh "/usr/local/bin/docker build -t ${params.IMAGE_NAME}:${params.TAG} ."
