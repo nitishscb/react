@@ -23,7 +23,7 @@ pipeline {
                     def credentials = credentials('react-test-nitish1')
 
                     // Extract the service account key from the credentials
-                    def serviceAccountKey = credentials.secret.toString()
+                    def serviceAccountKey = credentials.secretKey
 
                     // Set the GOOGLE_APPLICATION_CREDENTIALS environment variable to the service account key
                     withEnv(['GOOGLE_APPLICATION_CREDENTIALS' : serviceAccountKey]) {
