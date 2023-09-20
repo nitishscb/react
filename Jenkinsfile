@@ -29,11 +29,5 @@ pipeline {
         // Add more stages for your build, test, deploy, etc.
     }
     
-    post {
-        always {
-            // Clean up the Google Cloud SDK authentication file
-            deleteFile(file: GOOGLE_APPLICATION_CREDENTIALS)
-        }
-    }
 }
 
