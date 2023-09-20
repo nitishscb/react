@@ -1,27 +1,39 @@
 pipeline {
-  agent any
-
-  stages {
-    stage('Validate GCP connection') {
-      steps {
-        // Check if the GOOGLE_APPLICATION_CREDENTIALS environment variable is set.
-        if (System.getenv('GOOGLE_APPLICATION_CREDENTIALS') == null) {
-          error('GCP is not connected to Jenkins.')
-        }
-
-        // Try to authenticate to GCP using the service account credentials.
-        try {
-          // ...
-        } catch (Exception e) {
-          error('Failed to authenticate to GCP: ' + e.getMessage())
-        }
-      }
+    agent any
+    
+    environment {
+        GCP_SA_KEY_FILE = credentials('GCP_SA_KEY_FILE') // Retrieve the GCP service account key from credentials
+        GOOGLE_APPLICATION_CREDENTIALS = "${env.WORKSPACE}/gcp-sa-key.json" // Path to save the key file within the Jenkins workspace
     }
-
-    stage('Deploy to GCP') {
-      steps {
-        // Deploy your application to GCP.
-      }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout your source code
+                checkout scm
+            }
+        }
+        
+        stage('Setup Google Cloud SDK') {
+            steps {
+                script {
+                    // Set up the Google Cloud SDK
+                    sh """
+                        echo ${GCP_SA_KEY_FILE} > ${GOOGLE_APPLICATION_CREDENTIALS}
+                        gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+                    """
+                }
+            }
+        }
+        
+        // Add more stages for your build, test, deploy, etc.
     }
-  }
+    
+    post {
+        always {
+            // Clean up the Google Cloud SDK authentication file
+            deleteFile(file: GOOGLE_APPLICATION_CREDENTIALS)
+        }
+    }
 }
+
