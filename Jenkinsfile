@@ -20,23 +20,18 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Read the content of the credentials file
                     def credentialsContent = readFile params.GOOGLE_APPLICATION_CREDENTIALS
                     sh "echo '\$credentialsContent' > /tmp/gcp-key.json"
                     sh "export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json"
 
+                    // Authenticate with Docker using the Google Application Credentials
+                    sh "/usr/local/bin/docker login -u _json_key -p '\$(cat /tmp/gcp-key.json)' https://gcr.io"
+
                     // Build the Docker image
                     sh "/usr/local/bin/docker build -t ${params.IMAGE_NAME}:${params.TAG} ."
-                }
-            }
-        }
 
-        stage('Push Docker Image to GCR') {
-            steps {
-                script {
-                    // Authenticate with GCR
-                    sh "/usr/local/bin/docker tag ${params.IMAGE_NAME}:${params.TAG} gcr.io/${params.PROJECT_ID}/${params.IMAGE_NAME}:${params.TAG}"
-                    sh "/usr/local/bin/docker push gcr.io/${params.PROJECT_ID}/${params.IMAGE_NAME}:${params.TAG}"
+                    // Push the Docker image to Google Container Registry (GCR)
+                    sh "/usr/local/bin/docker push ${params.IMAGE_NAME}:${params.TAG}"
                 }
             }
         }
