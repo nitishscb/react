@@ -18,7 +18,7 @@ pipeline {
                     sh '/Users/nitish.upadhyay@postman.com/Downloads/google-cloud-sdk/bin/gcloud auth configure-docker'
                     
                     // Push the Docker image to GCP Container Registry
-                    sh '/usr/local/bin/docker push gcr.io/your-gcp-project/your-image:tag'
+                    sh '/usr/local/bin/docker push gcr.io/react-test-nitish1/react2:latest'
                 }
             }
         }
