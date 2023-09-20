@@ -29,7 +29,7 @@ pipeline {
             steps {
                 script {
                     // Authenticate with GCR using provided credentials
-                    withCredentials([file(credentialsId: 'your-credentials-id', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    withCredentials([file(credentialsId: 'react-test-nitish1', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                         sh "/usr/local/bin/docker login -u _json_key -p \$(cat \$GOOGLE_APPLICATION_CREDENTIALS) https://gcr.io"
                     }
 
