@@ -20,7 +20,7 @@ pipeline {
                     // Set up the Google Cloud SDK
                     sh """
                         echo ${GCP_SA_KEY_FILE} > ${GOOGLE_APPLICATION_CREDENTIALS}
-                        gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+                        /Users/nitish.upadhyay@postman.com/Downloads/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
                     """
                 }
             }
