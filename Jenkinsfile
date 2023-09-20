@@ -18,7 +18,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                withCredentials([usernameColonPassword(credentialsId: 'react-test-nitish1', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                withGoogleCredentials(credentialsId: 'react-test-nitish1') {
                     script {
                         sh "echo '\$GOOGLE_APPLICATION_CREDENTIALS' > /tmp/gcp-key.json"
                         sh "export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json"
