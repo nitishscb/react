@@ -20,12 +20,16 @@ pipeline {
             steps {
                 script {
                     // Get the GCP service account credentials from Jenkins global credentials
-                    def credentials = credentials('nitish-secret')
+                    def credentials = credentials('react-test-nitish1')
+                    
+                    // Use a temporary file to store the service account key
+                    def tempKeyFile = File.createTempFile('gcp-key', '.json')
+                    tempKeyFile.text = credentials.secret.toString()
 
-                    // Set the GOOGLE_APPLICATION_CREDENTIALS environment variable to the service account key
-                    withCredentials([string(credentialsId: 'nitish-secret', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    // Bind the temporary file to an environment variable
+                    withCredentials([fileBinding(credentialsId: 'react-test-nitish1', variable: 'JSON_KEY', 'tempKeyFile')]) {
                         // Authenticate with Docker using the Google Application Credentials
-                        sh "/usr/local/bin/docker login -u _json_key -p '$GOOGLE_APPLICATION_CREDENTIALS' https://gcr.io"
+                        sh "/usr/local/bin/docker login -u _json_key -p '\$(cat $JSON_KEY)' https://gcr.io"
 
                         // Build the Docker image
                         sh "/usr/local/bin/docker build -t ${params.IMAGE_NAME}:${params.TAG} ."
@@ -33,6 +37,9 @@ pipeline {
                         // Push the Docker image to Google Container Registry (GCR)
                         sh "/usr/local/bin/docker push ${params.IMAGE_NAME}:${params.TAG}"
                     }
+
+                    // Clean up the temporary file
+                    tempKeyFile.delete()
                 }
             }
         }
