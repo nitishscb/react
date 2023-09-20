@@ -5,13 +5,14 @@ pipeline {
         string(name: 'PROJECT_ID', description: 'GCP Project ID', defaultValue: 'your-project-id')
         string(name: 'IMAGE_NAME', description: 'Docker Image Name', defaultValue: 'gcr.io/your-project-id/your-image')
         string(name: 'TAG', description: 'Docker Image Tag', defaultValue: 'latest')
+        string(name: 'GCP_SERVICE_ACCOUNT_JSON_BASE64', description: 'Base64 encoded Google Service Account JSON Key')
     }
 
     stages {
         stage('Build Docker Image') {
             steps {
                 script {
-                    def credentialsJson = credentials('GCP_SERVICE_ACCOUNT_JSON')
+                    def credentialsJson = sh(script: "echo ${params.GCP_SERVICE_ACCOUNT_JSON_BASE64} | base64 --decode", returnStdout: true).trim()
                     def credentialsFile = writeCredentialsToFile(credentialsJson)
 
                     // Authenticate with Docker using the Google Application Credentials
