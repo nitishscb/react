@@ -19,17 +19,16 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Get the GCP service account credentials from Jenkins global credentials
-                    def credentials = credentials('nitish-secret')
-                    
-                    // Use a temporary file to store the service account key
-                    def tempKeyFile = File.createTempFile('gcp-key', '.json')
-                    tempKeyFile.text = credentials.secret.toString()
+                    // Retrieve the GCP service account key from the secret file
+                    def serviceAccountKey = credentials('nitish-secret')
 
-                    // Bind the temporary file to an environment variable
-                    withCredentials([fileBinding(credentialsId: 'nitish-secret', variable: 'JSON_KEY', 'tempKeyFile')]) {
+                    // Write the service account key to a temporary file
+                    def tempKeyFile = writeFile(file: 'temp-key.json', text: serviceAccountKey)
+
+                    // Set the GOOGLE_APPLICATION_CREDENTIALS environment variable to the temporary key file path
+                    withEnv(['GOOGLE_APPLICATION_CREDENTIALS' : tempKeyFile]) {
                         // Authenticate with Docker using the Google Application Credentials
-                        sh "/usr/local/bin/docker login -u _json_key -p '\$(cat $JSON_KEY)' https://gcr.io"
+                        sh "/usr/local/bin/docker login -u _json_key -p '\$(cat $GOOGLE_APPLICATION_CREDENTIALS)' https://gcr.io"
 
                         // Build the Docker image
                         sh "/usr/local/bin/docker build -t ${params.IMAGE_NAME}:${params.TAG} ."
@@ -38,8 +37,8 @@ pipeline {
                         sh "/usr/local/bin/docker push ${params.IMAGE_NAME}:${params.TAG}"
                     }
 
-                    // Clean up the temporary file
-                    tempKeyFile.delete()
+                    // Clean up the temporary key file
+                    deleteFile tempKeyFile
                 }
             }
         }
