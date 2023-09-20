@@ -11,11 +11,12 @@ pipeline {
             steps {
                 script {
                     // Write the GCP credentials to a JSON key file
-                    writeFile file: 'service-account-key.json', text: "${GCP_CREDENTIALS}"
+                    writeFile file: '/Users/nitish.upadhyay@postman.com/.jenkins/workspace/service-account-key.json', text: "${GCP_CREDENTIALS}"
 
                     // Authenticate using gcloud and validate the credentials
                     sh '''
-                        /Users/nitish.upadhyay@postman.com/Downloads/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=service-account-key.json
+                        cat /Users/nitish.upadhyay@postman.com/.jenkins/workspace/service-account-key.json
+                        /Users/nitish.upadhyay@postman.com/Downloads/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=/Users/nitish.upadhyay@postman.com/.jenkins/workspace/service-account-key.json
                         /Users/nitish.upadhyay@postman.com/Downloads/google-cloud-sdk/bin/gcloud config set project ${GCP_PROJECT_ID}
                         /Users/nitish.upadhyay@postman.com/Downloads/google-cloud-sdk/bin/gcloud compute instances list --limit=1  # Replace with an appropriate gcloud command for validation
                     '''
