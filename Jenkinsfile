@@ -23,7 +23,7 @@ pipeline {
                     def credentials = credentials('react-test-nitish1')
 
                     // Set the GOOGLE_APPLICATION_CREDENTIALS environment variable to the service account key
-                    withEnv(['GOOGLE_APPLICATION_CREDENTIALS' : credentials]) {
+                    withCredentials([string(credentialsId: 'react-test-nitish1', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                         // Authenticate with Docker using the Google Application Credentials
                         sh "/usr/local/bin/docker login -u _json_key -p '$GOOGLE_APPLICATION_CREDENTIALS' https://gcr.io"
 
