@@ -19,7 +19,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                sh "/usr/local/bin/docker build -t gcr.io/${params.PROJECT_ID}/${params.IMAGE_NAME}:${params.TAG} ."
+                #sh "/usr/local/bin/docker build -t gcr.io/${params.PROJECT_ID}/${params.IMAGE_NAME}:${params.TAG} ."
+		sh "/usr/local/bin/docker build -t gcr.io/${params.PROJECT_ID}/${params.IMAGE_NAME}:${params.TAG} ."
 		}
             }
         }
