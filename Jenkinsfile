@@ -2,10 +2,10 @@ pipeline {
     agent any
 
     parameters {
-        string(name: 'PROJECT_ID', description: 'GCP Project ID', defaultValue: 'your-gcp-project-id')
-        string(name: 'CLUSTER_NAME', description: 'GKE Cluster Name', defaultValue: 'your-gke-cluster-name')
-        string(name: 'REGION', description: 'GKE Cluster Region', defaultValue: 'your-gke-cluster-region')
-        string(name: 'IMAGE_NAME', description: 'Docker Image Name', defaultValue: 'your-image-name')
+        string(name: 'PROJECT_ID', description: 'GCP Project ID', defaultValue: 'react-test-nitish1')
+        string(name: 'CLUSTER_NAME', description: 'GKE Cluster Name', defaultValue: 'react-app')
+        string(name: 'REGION', description: 'GKE Cluster Region', defaultValue: 'us-central1')
+        string(name: 'IMAGE_NAME', description: 'Docker Image Name', defaultValue: 'gcr.io/react-test-nitish1/react-app2:latest')
         string(name: 'TAG', description: 'Docker Image Tag', defaultValue: 'latest')
     }
 
@@ -19,7 +19,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                sh "docker build -t gcr.io/${params.PROJECT_ID}/${params.IMAGE_NAME}:${params.TAG} ."
+                sh "/usr/local/bin/docker build -t gcr.io/${params.PROJECT_ID}/${params.IMAGE_NAME}:${params.TAG} ."
 		}
             }
         }
