@@ -16,7 +16,7 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Authorise GCP') {
             steps {
                 script {
 		    withCredentials([file(credentialsId: 'GCP_SA_KEY_FILE', variable: 'KEYFILE')]) {
