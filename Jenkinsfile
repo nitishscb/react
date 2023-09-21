@@ -21,8 +21,8 @@ pipeline {
                 script {
 		    withCredentials([file(credentialsId: 'GCP_SA_KEY_FILE', variable: 'KEYFILE')]) {
                     // Authenticate with Google Cloud using the service account key file
-                    sh "/Users/nitish.upadhyay@postman.com/Downloads/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file='${KEYFILE}'"
-		    sh "/Users/nitish.upadhyay@postman.com/Downloads/google-cloud-sdk/bin/gcloud container clusters get-credentials ${params.CLUSTER_NAME} --region ${params.REGION} --project ${params.PROJECT_ID}"
+                    sh "gcloud auth activate-service-account --key-file='${KEYFILE}'"
+		    sh "gcloud container clusters get-credentials ${params.CLUSTER_NAME} --region ${params.REGION} --project ${params.PROJECT_ID}"
                        }
 		  }
 		}
