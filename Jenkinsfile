@@ -32,7 +32,7 @@ pipeline {
              steps {
 		script {
                     // Build the Docker image
-                    sh "/usr/local/bin/docker build -t ${params.IMAGE_NAME}:${params.TAG} ."
+                    sh "/usr/local/bin/docker build -t gcr.oi/react-test-nitish1/${params.IMAGE_NAME}:${params.TAG} ."
 
                     // Push the Docker image to Google Container Registry (GCR)
                     sh "/usr/local/bin/docker push gcr.oi/react-test-nitish1/${params.IMAGE_NAME}:${params.TAG}"
