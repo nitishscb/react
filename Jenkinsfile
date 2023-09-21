@@ -31,7 +31,11 @@ pipeline {
 	stage('Build Docker Image') {
              steps {
 		script {
-                    // Build the Docker image
+		    // Get the authenticated account
+                    def authenticatedAccount = sh(script: "/Users/nitish.upadhyay@postman.com/Downloads/google-cloud-sdk/bin/gcloud auth list --filter=status:ACTIVE --format='value(account)'", returnStdout: true).trim()
+                    echo "Authenticated GCP account: ${authenticatedAccount}"
+                    
+		    // Build the Docker image
                     sh "/usr/local/bin/docker build -t gcr.io/react-test-nitish1/${params.IMAGE_NAME}:${params.TAG} ."
 
                     // Push the Docker image to Google Container Registry (GCR)
@@ -50,4 +54,3 @@ pipeline {
         }
     }
 }
-
