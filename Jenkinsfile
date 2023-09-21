@@ -22,6 +22,7 @@ pipeline {
 		    withCredentials([file(credentialsId: 'GCP_SA_KEY_FILE', variable: 'KEYFILE')]) {
                     // Authenticate with Google Cloud using the service account key file
                     sh "/Users/nitish.upadhyay@postman.com/Downloads/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file='${KEYFILE}'"
+		    sh "/Users/nitish.upadhyay@postman.com/Downloads/google-cloud-sdk/bin/gcloud container clusters get-credentials ${params.CLUSTER_NAME} --region ${params.REGION} --project ${params.PROJECT_ID}"
                        }
 		  }
 		}
@@ -34,7 +35,7 @@ pipeline {
                     sh "/usr/local/bin/docker build -t ${params.IMAGE_NAME}:${params.TAG} ."
 
                     // Push the Docker image to Google Container Registry (GCR)
-                    sh "/usr/local/bin/docker push ${params.IMAGE_NAME}:${params.TAG}"
+                    sh "/usr/local/bin/docker push gcr.oi/react-test-nitish1/${params.IMAGE_NAME}:${params.TAG}"
                 }
             }
         }
