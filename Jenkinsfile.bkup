@@ -16,12 +16,12 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Authorise GCP') {
             steps {
                 script {
 		    withCredentials([file(credentialsId: 'GCP_SA_KEY_FILE', variable: 'KEYFILE')]) {
-                    // Authenticate with Google Cloud using the service account key file
-                    sh "/Users/nitish.upadhyay@postman.com/Downloads/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file='${KEYFILE}'"
+                    sh "gcloud auth activate-service-account --key-file='${KEYFILE}'"
+		    sh "gcloud container clusters get-credentials ${params.CLUSTER_NAME} --region ${params.REGION} --project ${params.PROJECT_ID}"
                        }
 		  }
 		}
@@ -30,11 +30,15 @@ pipeline {
 	stage('Build Docker Image') {
              steps {
 		script {
-                    // Build the Docker image
-                    sh "/usr/local/bin/docker build -t ${params.IMAGE_NAME}:${params.TAG} ."
+		    // Get the authenticated account
+                    def authenticatedAccount = sh(script: "/Users/nitish.upadhyay@postman.com/Downloads/google-cloud-sdk/bin/gcloud auth list --filter=status:ACTIVE --format='value(account)'", returnStdout: true).trim()
+                    echo "Authenticated GCP account: ${authenticatedAccount}"
+                    
+		    // Build the Docker image
+                    sh "/usr/local/bin/docker build -t gcr.io/react-test-nitish1/${params.IMAGE_NAME}:${params.TAG} ."
 
                     // Push the Docker image to Google Container Registry (GCR)
-                    sh "/usr/local/bin/docker push ${params.IMAGE_NAME}:${params.TAG}"
+                    sh "/usr/local/bin/docker push gcr.io/react-test-nitish1/${params.IMAGE_NAME}:${params.TAG}"
                 }
             }
         }
@@ -49,4 +53,3 @@ pipeline {
         }
     }
 }
-
