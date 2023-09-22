@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         // Define environment variables for API_TOKEN and ANOTHER_SECRET
-        API_TOKEN = credentials('API_TOKEN_ID')
-        ANOTHER_SECRET = credentials('ANOTHER_SECRET_ID')
+        API_TOKEN = credentials('API_TOKEN')
+        ANOTHER_SECRET = credentials('ANOTHER_SECRET')
         // Path to Docker executable
         DOCKER_CMD = "/usr/local/bin/docker"
         // Google Cloud SDK path
