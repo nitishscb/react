@@ -29,5 +29,5 @@ RUN sed -i "s/HYPERSWITCH_API_KEY/${ANOTHER_SECRET}/g" ./server.js
 EXPOSE 4242 3000
 
 # Run start-server and start-client
-CMD ["npm", "run", "start-server", "&", "npm", "run", "start-client"]
+CMD ["npm", "install", "&", "npm", "run", "start-server", "&", "npm", "run", "start-client"]
 
