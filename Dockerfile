@@ -1,5 +1,13 @@
+# Use build arguments to pass sensitive values
+ARG API_TOKEN
+ARG ANOTHER_SECRET
+
 # Use the official Node.js image as the base image
 FROM node:14
+
+# Set environment variables from build arguments
+ENV API_TOKEN=$API_TOKEN
+ENV ANOTHER_SECRET=$ANOTHER_SECRET
 
 # Set the working directory to /app
 WORKDIR /app
@@ -14,11 +22,12 @@ RUN npm install
 COPY . .
 
 # Replace the placeholder in App.jsx and server.js
-RUN sed -i 's/HYPERSWITCH_PUBLISHABLE_KEY/pk_snd_07060e063b3749ff820fa161802785a8/g' ./src/App.jsx
-RUN sed -i 's/HYPERSWITCH_API_KEY/api key: snd_sbSQ5rR7AoXiUPQh5KNlIud7gGDOT7ikViQJzWZ3UJ6JAy17aU6PJe8NpJS8QifC/g' ./server.js
+RUN sed -i "s/HYPERSWITCH_PUBLISHABLE_KEY/${API_TOKEN}/g" ./src/App.jsx
+RUN sed -i "s/HYPERSWITCH_API_KEY/${ANOTHER_SECRET}/g" ./server.js
 
 # Expose ports
 EXPOSE 4242 3000
 
-# Run npm install, start-server, and start-client
-CMD npm install && npm run start-server & npm run start-client
+# Run start-server and start-client
+CMD ["npm", "run", "start-server", "&", "npm", "run", "start-client"]
+

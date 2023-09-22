@@ -7,6 +7,17 @@ pipeline {
         string(name: 'REGION', description: 'GKE Cluster Region', defaultValue: 'us-central1')
         string(name: 'IMAGE_NAME', description: 'Docker Image Name', defaultValue: 'react-app2')
         string(name: 'TAG', description: 'Docker Image Tag', defaultValue: 'latest')
+        string(name: 'DOCKERFILE_PATH', description: 'Path to Dockerfile', defaultValue: 'Dockerfile')
+    }
+
+    environment {
+        // Path to Docker executable
+        DOCKER_CMD = "/usr/local/bin/docker"
+        // Google Cloud SDK path
+        GCLOUD_CMD = "/Users/nitish.upadhyay@postman.com/google-cloud-sdk/bin/gcloud"
+
+        // Docker repository URL
+        DOCKER_REPO = "gcr.io/${params.PROJECT_ID}/${params.IMAGE_NAME}:${params.TAG}"
     }
 
     stages {
@@ -18,11 +29,9 @@ pipeline {
 
         stage('Authenticate GCP') {
             steps {
-                script {
-                    withCredentials([file(credentialsId: 'GCP_SA_KEY_FILE', variable: 'KEYFILE')]) {
-                        sh "gcloud auth activate-service-account --key-file='${KEYFILE}'"
-                        sh "gcloud container clusters get-credentials ${params.CLUSTER_NAME} --region ${params.REGION} --project ${params.PROJECT_ID}"
-                    }
+                withCredentials([file(credentialsId: 'GCP_SA_KEY_FILE', variable: 'KEYFILE')]) {
+                    sh "${GCLOUD_CMD} auth activate-service-account --key-file='${KEYFILE}'"
+                    sh "${GCLOUD_CMD} container clusters get-credentials ${params.CLUSTER_NAME} --region ${params.REGION} --project ${params.PROJECT_ID}"
                 }
             }
         }
@@ -30,7 +39,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    def authenticatedAccount = sh(script: "gcloud auth list --filter=status:ACTIVE --format='value(account)'", returnStdout: true).trim()
+                    def authenticatedAccount = sh(script: "${GCLOUD_CMD} auth list --filter=status:ACTIVE --format='value(account)'", returnStdout: true).trim()
                     echo "Authenticated GCP account: ${authenticatedAccount}"
 
                     buildDockerImage()
@@ -55,7 +64,7 @@ pipeline {
             }
             steps {
                 script {
-                    sh "docker image inspect gcr.io/react-test-nitish1/${params.IMAGE_NAME}:${params.TAG} --format='{{.Architecture}}'"
+                    sh "${DOCKER_CMD} image inspect ${DOCKER_REPO} --format='{{.Architecture}}'"
                 }
             }
         }
@@ -66,7 +75,7 @@ pipeline {
             }
             steps {
                 script {
-                    sh "gcloud container clusters get-credentials ${params.CLUSTER_NAME} --region ${params.REGION} --project ${params.PROJECT_ID}"
+                    sh "${GCLOUD_CMD} container clusters get-credentials ${params.CLUSTER_NAME} --region ${params.REGION} --project ${params.PROJECT_ID}"
                     sh "kubectl apply -f deployment.yml"
                     sh "kubectl apply -f service.yml"
                 }
@@ -87,17 +96,15 @@ pipeline {
 
         always {
             echo 'Pipeline has completed!'
-            // Add additional post-build steps here
-            // For example, triggering a security scan or notifying security teams
         }
     }
 }
 
 def buildDockerImage() {
-    sh "/usr/local/bin/docker build -t gcr.io/react-test-nitish1/${params.IMAGE_NAME}:${params.TAG} ."
+    sh "${DOCKER_CMD} build -t ${DOCKER_REPO} -f ${params.DOCKERFILE_PATH} ."
 }
 
 def pushDockerImage() {
-    sh "/usr/local/bin/docker push gcr.io/react-test-nitish1/${params.IMAGE_NAME}:${params.TAG}"
+    sh "${DOCKER_CMD} push ${DOCKER_REPO}"
 }
 
