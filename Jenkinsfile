@@ -1,6 +1,18 @@
 pipeline {
     agent any
 
+    environment {
+        // Define environment variables for API_TOKEN and ANOTHER_SECRET
+        API_TOKEN = credentials('API_TOKEN_ID')
+        ANOTHER_SECRET = credentials('ANOTHER_SECRET_ID')
+        // Path to Docker executable
+        DOCKER_CMD = "/usr/local/bin/docker"
+        // Google Cloud SDK path
+        GCLOUD_CMD = "/Users/nitish.upadhyay@postman.com/google-cloud-sdk/bin/gcloud"
+        // Docker repository URL
+        DOCKER_REPO = "gcr.io/${params.PROJECT_ID}/${params.IMAGE_NAME}:${params.TAG}"
+    }
+
     parameters {
         string(name: 'PROJECT_ID', description: 'GCP Project ID', defaultValue: 'react-test-nitish1', trim: true)
         string(name: 'CLUSTER_NAME', description: 'GKE Cluster Name', defaultValue: 'react-app', trim: true)
@@ -8,15 +20,6 @@ pipeline {
         string(name: 'IMAGE_NAME', description: 'Docker Image Name', defaultValue: 'react-app2', trim: true)
         string(name: 'TAG', description: 'Docker Image Tag', defaultValue: 'latest', trim: true)
         string(name: 'DOCKERFILE_PATH', description: 'Path to Dockerfile', defaultValue: 'Dockerfile', trim: true)
-    }
-
-    environment {
-        // Path to Docker executable
-        DOCKER_CMD = "/usr/local/bin/docker"
-        // Google Cloud SDK path
-        GCLOUD_CMD = "/Users/nitish.upadhyay@postman.com/google-cloud-sdk/bin/gcloud"
-        // Docker repository URL
-        DOCKER_REPO = "gcr.io/${params.PROJECT_ID}/${params.IMAGE_NAME}:${params.TAG}"
     }
 
     stages {
@@ -41,10 +44,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build Docker image with build arguments for API_TOKEN and ANOTHER_SECRET
-                    withCredentials([string(credentialsId: 'API_TOKEN', variable: 'API_TOKEN'), string(credentialsId: 'ANOTHER_SECRET', variable: 'ANOTHER_SECRET')]) {
-                        buildDockerImage()
-                    }
+                    // Build Docker image with build arguments from environment variables
+                    buildDockerImage()
                 }
             }
         }
@@ -105,6 +106,7 @@ pipeline {
 }
 
 def buildDockerImage() {
+    // Build Docker image with build arguments from environment variables
     sh "${DOCKER_CMD} build --build-arg API_TOKEN=${API_TOKEN} --build-arg ANOTHER_SECRET=${ANOTHER_SECRET} -t ${DOCKER_REPO} -f ${params.DOCKERFILE_PATH} ."
 }
 
