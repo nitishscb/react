@@ -106,8 +106,11 @@ pipeline {
 }
 
 def buildDockerImage() {
-    // Create a temporary directory
-    def tempDir = mktemp()
+    // Generate a unique temporary directory name using a timestamp
+    def tempDir = "${WORKSPACE}/temp_${new Date().getTime()}"
+
+    // Create the temporary directory
+    sh "mkdir ${tempDir}"
 
     // Write the Dockerfile with build arguments substituted
     writeFile file: "${tempDir}/Dockerfile", text: "FROM node:14\nARG API_TOKEN\nARG ANOTHER_SECRET\n..."
