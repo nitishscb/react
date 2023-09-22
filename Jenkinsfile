@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         // Define environment variables for API_TOKEN and ANOTHER_SECRET
-        API_TOKEN = credentials('API_TOKEN')
-        ANOTHER_SECRET = credentials('ANOTHER_SECRET')
+        API_TOKEN = credentials('API_TOKEN_ID')
+        ANOTHER_SECRET = credentials('ANOTHER_SECRET_ID')
         // Path to Docker executable
         DOCKER_CMD = "/usr/local/bin/docker"
         // Google Cloud SDK path
@@ -106,8 +106,17 @@ pipeline {
 }
 
 def buildDockerImage() {
-    // Build Docker image with build arguments from environment variables
-    sh "${DOCKER_CMD} build --build-arg API_TOKEN=${API_TOKEN} --build-arg ANOTHER_SECRET=${ANOTHER_SECRET} -t ${DOCKER_REPO} -f ${params.DOCKERFILE_PATH} ."
+    // Create a temporary directory
+    def tempDir = mktemp()
+
+    // Write the Dockerfile with build arguments substituted
+    writeFile file: "${tempDir}/Dockerfile", text: "FROM node:14\nARG API_TOKEN\nARG ANOTHER_SECRET\n..."
+
+    // Build Docker image from the temporary directory
+    sh "${DOCKER_CMD} build --build-arg API_TOKEN=${API_TOKEN} --build-arg ANOTHER_SECRET=${ANOTHER_SECRET} -t ${DOCKER_REPO} -f ${tempDir}/Dockerfile ${tempDir}"
+
+    // Cleanup the temporary directory
+    sh "rm -rf ${tempDir}"
 }
 
 def pushDockerImage() {
