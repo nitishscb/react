@@ -106,21 +106,21 @@ pipeline {
 }
 
 def buildDockerImage() {
-    // Generate a unique temporary directory name using a timestamp
     def tempDir = "${WORKSPACE}/temp_${new Date().getTime()}"
-
-    // Create the temporary directory
     sh "mkdir ${tempDir}"
 
     // Write the Dockerfile with build arguments substituted
     writeFile file: "${tempDir}/Dockerfile", text: "FROM node:14\nARG API_TOKEN\nARG ANOTHER_SECRET\n..."
 
-    // Build Docker image from the temporary directory
-    sh "${DOCKER_CMD} build --build-arg API_TOKEN=${API_TOKEN} --build-arg ANOTHER_SECRET=${ANOTHER_SECRET} -t ${DOCKER_REPO} -f ${tempDir}/Dockerfile ${tempDir}"
+    // Change to the directory where the Dockerfile is located
+    sh "cd ${tempDir}"
 
-    // Cleanup the temporary directory
+    // Build Docker image from the directory where Dockerfile is located
+    sh "${DOCKER_CMD} build -t ${DOCKER_REPO} --build-arg API_TOKEN=${MASKED_API_TOKEN} --build-arg ANOTHER_SECRET=${MASKED_ANOTHER_SECRET} ."
+
     sh "rm -rf ${tempDir}"
 }
+
 
 def pushDockerImage() {
     sh "${DOCKER_CMD} push ${DOCKER_REPO}"
