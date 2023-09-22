@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     parameters {
-        string(name: 'PROJECT_ID', description: 'GCP Project ID', defaultValue: 'react-test-nitish1')
-        string(name: 'CLUSTER_NAME', description: 'GKE Cluster Name', defaultValue: 'react-app')
-        string(name: 'REGION', description: 'GKE Cluster Region', defaultValue: 'us-central1')
-        string(name: 'IMAGE_NAME', description: 'Docker Image Name', defaultValue: 'react-app2')
-        string(name: 'TAG', description: 'Docker Image Tag', defaultValue: 'latest')
-        string(name: 'DOCKERFILE_PATH', description: 'Path to Dockerfile', defaultValue: 'Dockerfile')
+        string(name: 'PROJECT_ID', description: 'GCP Project ID', defaultValue: 'react-test-nitish1', trim: true)
+        string(name: 'CLUSTER_NAME', description: 'GKE Cluster Name', defaultValue: 'react-app', trim: true)
+        string(name: 'REGION', description: 'GKE Cluster Region', defaultValue: 'us-central1', trim: true)
+        string(name: 'IMAGE_NAME', description: 'Docker Image Name', defaultValue: 'react-app2', trim: true)
+        string(name: 'TAG', description: 'Docker Image Tag', defaultValue: 'latest', trim: true)
+        string(name: 'DOCKERFILE_PATH', description: 'Path to Dockerfile', defaultValue: 'Dockerfile', trim: true)
     }
 
     environment {
@@ -15,7 +15,6 @@ pipeline {
         DOCKER_CMD = "/usr/local/bin/docker"
         // Google Cloud SDK path
         GCLOUD_CMD = "/Users/nitish.upadhyay@postman.com/google-cloud-sdk/bin/gcloud"
-
         // Docker repository URL
         DOCKER_REPO = "gcr.io/${params.PROJECT_ID}/${params.IMAGE_NAME}:${params.TAG}"
     }
@@ -29,9 +28,12 @@ pipeline {
 
         stage('Authenticate GCP') {
             steps {
-                withCredentials([file(credentialsId: 'GCP_SA_KEY_FILE', variable: 'KEYFILE')]) {
-                    sh "${GCLOUD_CMD} auth activate-service-account --key-file='${KEYFILE}'"
-                    sh "${GCLOUD_CMD} container clusters get-credentials ${params.CLUSTER_NAME} --region ${params.REGION} --project ${params.PROJECT_ID}"
+                script {
+                    // Authenticating GCP
+                    withCredentials([file(credentialsId: 'GCP_SA_KEY_FILE', variable: 'KEYFILE')]) {
+                        sh "${GCLOUD_CMD} auth activate-service-account --key-file=${KEYFILE}"
+                        sh "${GCLOUD_CMD} container clusters get-credentials ${params.CLUSTER_NAME} --region ${params.REGION} --project ${params.PROJECT_ID}"
+                    }
                 }
             }
         }
@@ -39,10 +41,10 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    def authenticatedAccount = sh(script: "${GCLOUD_CMD} auth list --filter=status:ACTIVE --format='value(account)'", returnStdout: true).trim()
-                    echo "Authenticated GCP account: ${authenticatedAccount}"
-
-                    buildDockerImage()
+                    // Build Docker image with build arguments for API_TOKEN and ANOTHER_SECRET
+                    withCredentials([string(credentialsId: 'API_TOKEN', variable: 'API_TOKEN'), string(credentialsId: 'ANOTHER_SECRET', variable: 'ANOTHER_SECRET')]) {
+                        buildDockerImage()
+                    }
                 }
             }
         }
@@ -53,6 +55,7 @@ pipeline {
             }
             steps {
                 script {
+                    // Push Docker image to the repository
                     pushDockerImage()
                 }
             }
@@ -75,6 +78,7 @@ pipeline {
             }
             steps {
                 script {
+                    // Deploy to GKE
                     sh "${GCLOUD_CMD} container clusters get-credentials ${params.CLUSTER_NAME} --region ${params.REGION} --project ${params.PROJECT_ID}"
                     sh "kubectl apply -f deployment.yml"
                     sh "kubectl apply -f service.yml"
@@ -101,7 +105,7 @@ pipeline {
 }
 
 def buildDockerImage() {
-    sh "${DOCKER_CMD} build -t ${DOCKER_REPO} -f ${params.DOCKERFILE_PATH} ."
+    sh "${DOCKER_CMD} build --build-arg API_TOKEN=${API_TOKEN} --build-arg ANOTHER_SECRET=${ANOTHER_SECRET} -t ${DOCKER_REPO} -f ${params.DOCKERFILE_PATH} ."
 }
 
 def pushDockerImage() {
